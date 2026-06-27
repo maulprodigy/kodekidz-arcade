@@ -211,3 +211,48 @@ h1 { font-size: 2.8rem; margin-bottom: 10px; display: flex; align-items: center;
 .leader-row .info-name { font-weight: bold; font-size: 1.1rem; }
 .leader-row .info-school { font-size: 0.8rem; color: #7f8c8d; }
 .leader-row .score { font-weight: bold; color: #f39c12; font-size: 1.2rem; display: flex; align-items: center; gap: 5px; }
+
+/* =========================================
+   GAME 6: PETA HARTA KARUN
+========================================= */
+.map-bg { background: #ffeaa7; border: 4px dashed #d63031; }
+.pirate-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #81ecec; padding: 5px; border-radius: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); width: 100%; max-width: 250px; aspect-ratio: 1; margin-bottom: 15px;}
+.map-cell { background: #ffeaa7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.3s; }
+.map-cell.water { background: #74b9ff; }
+.map-cell.treasure { background: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
+
+/* =========================================
+   GAME 7: RESEP KUE (FUNGSI)
+========================================= */
+.kitchen-bg { background: #f5f6fa; border-color: #ff9ff3; }
+.oven-container { background: #576574; padding: 20px; border-radius: 15px; margin-bottom: 20px; color: white; text-align: center; font-weight: bold; border: 4px solid #222f3e; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+.oven { background: #c8d6e5; color: #222f3e; padding: 30px; border-radius: 10px; font-size: 1.2rem; border: inset 5px #8395a7; transition: background 0.3s; }
+.oven.baking { background: #ff9f43; animation: pulse 0.5s infinite; color: white; }
+.cakes-produced { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; min-height: 50px; }
+.cake-item { font-size: 2.5rem; animation: pop 0.4s; }
+
+/* =========================================
+   GAME 8: DETEKTIF (DEBUGGING)
+========================================= */
+.detective-bg { background: #2f3542; color: #a4b0be; }
+.bug-line { cursor: pointer; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; transition: background 0.2s; border: 1px solid transparent; display: flex; justify-content: space-between;}
+.bug-line:hover { background: #57606f; }
+.bug-line.selected { border-color: #ff4757; background: rgba(255, 71, 87, 0.2); }
+.bug-target { animation: pulse 2s infinite; margin-top: 50px; }
+
+/* =========================================
+   GAME 9: LACI (ARRAY)
+========================================= */
+.array-bg { background: #d1ccc0; border-color: #84817a; }
+.array-container { display: flex; gap: 5px; background: #b33939; padding: 15px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+.array-slot { width: 50px; height: 60px; background: #ffda79; border: 2px solid #cc8e35; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; position: relative; font-size: 1.8rem; border-radius: 5px; }
+.array-index-label { position: absolute; top: -25px; left: 0; width: 100%; text-align: center; font-weight: bold; color: white; font-size: 1rem; }
+
+/* =========================================
+   GAME 10: BEL (EVENT)
+========================================= */
+.school-bg { background: #c7ecee; border-color: #f6e58d; }
+.bell { font-size: 4rem; cursor: pointer; transition: transform 0.1s; user-select: none; margin-bottom: 20px; }
+.bell:active { transform: scale(0.9); }
+.bell.ringing { animation: shake 0.2s infinite; }
+.student { font-size: 5rem; transition: all 0.3s; margin-top: 10px; }
