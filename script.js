@@ -1,108 +1,127 @@
+// --- SUPABASE INIT ---
+const SUPABASE_URL = 'https://pabzyjwbeqzxajksbvzf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NecoOmdj4Z4XZD0wxPx3Xw_0kDfmOR1';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // --- GLOBAL STATE & LEADERBOARD ---
 let stars = 0;
 let completedLevelsSet = new Set();
 const starCountEl = document.getElementById('star-count');
 const profileText = document.getElementById('player-profile-text');
 
-let currentPlayer = { name: '', school: '' };
-
+let currentPlayer = { id: '', name: '', school: '' };
 let leaderboardData = [];
-// Dummy Data untuk Simulasi awal
-const dummyData = [
-    { name: 'Siti (Dummy)', school: 'SD Cendekia', stars: 28 },
-    { name: 'Joko (Dummy)', school: 'SD Bina Nusa', stars: 20 },
-    { name: 'Budi (Dummy)', school: 'SD Merdeka', stars: 15 }
-];
 
-function initSystem() {
-    // Load Leaderboard
-    const savedLb = localStorage.getItem('kodekidz_leaderboard');
-    if (savedLb) {
-        leaderboardData = JSON.parse(savedLb);
-    } else {
-        leaderboardData = [...dummyData];
-        saveLeaderboard();
-    }
+async function initSystem() {
+    // Subscribe to Auth changes
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+            await handleUserLogin(session.user);
+        } else if (event === 'SIGNED_OUT') {
+            document.getElementById('welcome-overlay').classList.remove('hidden');
+            document.getElementById('school-overlay').classList.add('hidden');
+            currentPlayer = { id: '', name: '', school: '' };
+            stars = 0;
+            completedLevelsSet.clear();
+            starCountEl.textContent = stars;
+            profileText.textContent = 'Halo, Pemain!';
+        }
+    });
 
-    // Load Current Session
-    const savedName = localStorage.getItem('kodekidz_current_name');
-    if (savedName) {
-        currentPlayer.name = savedName;
-        currentPlayer.school = localStorage.getItem('kodekidz_current_school') || '';
-        document.getElementById('welcome-overlay').classList.add('hidden');
-        profileText.textContent = `Halo, ${currentPlayer.name} (${currentPlayer.school})!`;
-        loadProgress();
-    } else {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
         document.getElementById('welcome-overlay').classList.remove('hidden');
     }
+    
+    // Subscribe to leaderboard real-time changes
+    fetchLeaderboard();
+    supabase.channel('public:leaderboard')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'leaderboard' }, payload => {
+            fetchLeaderboard();
+        })
+        .subscribe();
 }
 
-function loadProgress() {
-    const savedStars = localStorage.getItem('kodekidz_stars');
-    const savedLevels = localStorage.getItem('kodekidz_levels');
-    if (savedStars !== null) stars = parseInt(savedStars);
-    if (savedLevels !== null) {
-        try { completedLevelsSet = new Set(JSON.parse(savedLevels)); } catch(e) {}
-    }
-    starCountEl.textContent = stars;
-}
-
-function saveProgress() {
-    localStorage.setItem('kodekidz_stars', stars);
-    localStorage.setItem('kodekidz_levels', JSON.stringify(Array.from(completedLevelsSet)));
-    
-    // Update score in leaderboard array if it exists
-    const idx = leaderboardData.findIndex(p => p.name === currentPlayer.name && p.school === currentPlayer.school);
-    if (idx >= 0) {
-        leaderboardData[idx].stars = Math.max(leaderboardData[idx].stars, stars);
-    } else {
-        leaderboardData.push({ name: currentPlayer.name, school: currentPlayer.school, stars: stars });
-    }
-    saveLeaderboard();
-}
-
-function saveLeaderboard() {
-    localStorage.setItem('kodekidz_leaderboard', JSON.stringify(leaderboardData));
-}
-
-// --- WELCOME SCREEN LOGIC ---
-document.getElementById('btn-mulai').addEventListener('click', () => {
-    const nama = document.getElementById('input-nama').value.trim();
-    const sekolah = document.getElementById('input-sekolah').value.trim();
-    if (!nama || !sekolah) return alert("Tolong isi Nama dan Asal Sekolah ya!");
-    
-    currentPlayer.name = nama;
-    currentPlayer.school = sekolah;
-    localStorage.setItem('kodekidz_current_name', nama);
-    localStorage.setItem('kodekidz_current_school', sekolah);
-    
-    // Check if player already exists in leaderboard, to load their old score? 
-    // For now, let's just reset their local score to 0 to simulate fresh start, unless we want to load.
-    // If they want to continue, let's load if exists.
-    const exist = leaderboardData.find(p => p.name === nama && p.school === sekolah);
-    if(exist) {
-        // Just continue whatever is in local storage (might be out of sync, but it's simple)
-    } else {
-        // Fresh start
-        stars = 0;
-        completedLevelsSet.clear();
-        saveProgress();
-    }
-    
+async function handleUserLogin(user) {
     document.getElementById('welcome-overlay').classList.add('hidden');
+    currentPlayer.id = user.id;
+    currentPlayer.name = user.user_metadata.full_name || 'Koder';
+    
+    // Cek database
+    const { data, error } = await supabase.from('leaderboard').select('*').eq('id', user.id).maybeSingle();
+    
+    if (data) {
+        currentPlayer.school = data.school;
+        stars = data.stars;
+        loadLocalLevels(user.id);
+        profileText.textContent = `Halo, ${currentPlayer.name} (${currentPlayer.school})!`;
+        starCountEl.textContent = stars;
+    } else {
+        // User baru, minta sekolah
+        document.getElementById('school-overlay').classList.remove('hidden');
+    }
+}
+
+// Tombol Login
+document.getElementById('btn-login-google').addEventListener('click', async () => {
+    await supabase.auth.signInWithOAuth({ provider: 'google' });
+});
+
+// Tombol Simpan Sekolah (User Baru)
+document.getElementById('btn-save-school').addEventListener('click', async () => {
+    const sekolah = document.getElementById('input-sekolah').value.trim();
+    if (!sekolah) return alert("Tolong isi Asal Sekolah ya!");
+    
+    currentPlayer.school = sekolah;
+    stars = 0;
+    
+    // Insert ke Supabase
+    await supabase.from('leaderboard').upsert({
+        id: currentPlayer.id,
+        name: currentPlayer.name,
+        school: currentPlayer.school,
+        stars: stars
+    });
+    
+    document.getElementById('school-overlay').classList.add('hidden');
     profileText.textContent = `Halo, ${currentPlayer.name} (${currentPlayer.school})!`;
 });
 
-// --- GANTI PEMAIN LOGIC ---
-document.getElementById('reset-progress-btn').addEventListener('click', () => {
-    if (confirm("Ganti Pemain? Skor saat ini akan disimpan ke Papan Peringkat.")) {
-        localStorage.removeItem('kodekidz_current_name');
-        localStorage.removeItem('kodekidz_current_school');
-        localStorage.removeItem('kodekidz_stars');
-        localStorage.removeItem('kodekidz_levels');
-        location.reload();
+// Logout
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    if(confirm("Yakin ingin keluar?")) {
+        await supabase.auth.signOut();
     }
 });
+
+// Local Progress untuk State Level
+function loadLocalLevels(userId) {
+    const savedLevels = localStorage.getItem(`kodekidz_levels_${userId}`);
+    if (savedLevels) {
+        try { completedLevelsSet = new Set(JSON.parse(savedLevels)); } catch(e) {}
+    } else {
+        completedLevelsSet.clear();
+    }
+}
+
+async function saveProgress() {
+    if (currentPlayer.id) {
+        // Simpan local state
+        localStorage.setItem(`kodekidz_levels_${currentPlayer.id}`, JSON.stringify(Array.from(completedLevelsSet)));
+        // Update ke Supabase
+        await supabase.from('leaderboard').update({ stars: stars }).eq('id', currentPlayer.id);
+    }
+}
+
+async function fetchLeaderboard() {
+    const { data, error } = await supabase.from('leaderboard').select('*').order('stars', { ascending: false });
+    if (data) {
+        leaderboardData = data;
+        if(document.getElementById('leaderboard-modal').classList.contains('active')) {
+            renderLeaderboard();
+        }
+    }
+}
 
 // --- LEADERBOARD LOGIC ---
 document.getElementById('btn-open-leaderboard').addEventListener('click', () => {
@@ -119,8 +138,8 @@ function renderLeaderboard() {
     const podiumEl = document.getElementById('podium-container');
     listEl.innerHTML = ''; podiumEl.innerHTML = '';
     
-    // Sort descending by stars
-    const sorted = [...leaderboardData].sort((a, b) => b.stars - a.stars);
+    const sorted = leaderboardData;
+    if (!sorted || sorted.length === 0) return;
     
     // Render Podium (Top 3) - 2nd, 1st, 3rd
     const ranks = [
@@ -181,11 +200,11 @@ const failMsg = document.getElementById('fail-msg');
 
 let currentSuccessCallback = null;
 
-function showSuccess(gameId, levelIndex, msg, nextLevelCallback) {
+function showSuccess(gameId, levelIndex, msg, nextLevelCallback, starReward = 1) {
     const levelKey = `g${gameId}-l${levelIndex}`;
     if (!completedLevelsSet.has(levelKey)) {
         completedLevelsSet.add(levelKey);
-        stars = Math.min(30, stars + 1);
+        stars = Math.min(100, stars + starReward);
         starCountEl.textContent = stars;
         saveProgress();
     }
@@ -520,3 +539,351 @@ function checkColoring() {
     }
 }
 initColoring();
+
+
+// ==========================================
+// GAME 6: PETA (ALGORITMA)
+// ==========================================
+const g6Levels = [
+    { targetX: 2, targetY: 0, blocks: [{x:1,y:0}], star: 3 },
+    { targetX: 3, targetY: 2, blocks: [{x:1,y:1}, {x:2,y:1}], star: 3 },
+    { targetX: 0, targetY: 3, blocks: [{x:0,y:2}, {x:1,y:2}], star: 3 },
+    { targetX: 3, targetY: 3, blocks: [{x:1,y:0}, {x:1,y:2}, {x:2,y:2}, {x:3,y:2}], star: 3 }
+];
+let g6Curr = 0;
+let mapCommands = [];
+let mapRunning = false;
+
+function initMap() {
+    document.getElementById('g6-lvl').textContent = `Level ${g6Curr + 1} / 4`;
+    mapCommands = [];
+    renderMapQueue();
+    renderMapGrid();
+}
+
+function renderMapGrid(currentX = 0, currentY = 0) {
+    const grid = document.getElementById('pirate-map');
+    grid.innerHTML = '';
+    const lvl = g6Levels[g6Curr];
+    for(let y=0; y<4; y++) {
+        for(let x=0; x<4; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'map-cell';
+            if (lvl.blocks.some(b => b.x === x && b.y === y)) {
+                cell.classList.add('water');
+                cell.textContent = '🌊';
+            } else if (lvl.targetX === x && lvl.targetY === y) {
+                cell.classList.add('treasure');
+                cell.textContent = '💎';
+            }
+            if (x === currentX && y === currentY) {
+                cell.textContent = '🏴‍☠️';
+            }
+            grid.appendChild(cell);
+        }
+    }
+}
+
+function addMapCmd(cmd) { if(!mapRunning) { mapCommands.push(cmd); renderMapQueue(); } }
+function clearMap() { if(!mapRunning) initMap(); }
+function renderMapQueue() {
+    const q = document.getElementById('map-queue'); q.innerHTML = '';
+    mapCommands.forEach((cmd, idx) => {
+        const s = document.createElement('span'); s.className = 'queue-item';
+        s.textContent = cmd;
+        s.onclick = () => { if(!mapRunning) { mapCommands.splice(idx,1); renderMapQueue(); } };
+        q.appendChild(s);
+    });
+}
+
+async function checkMap() {
+    if(mapRunning || mapCommands.length === 0) return;
+    mapRunning = true;
+    let cx = 0, cy = 0;
+    const lvl = g6Levels[g6Curr];
+    
+    renderMapGrid(cx, cy);
+    await delay(500);
+    
+    for(let cmd of mapCommands) {
+        if(cmd === 'Atas') cy--;
+        if(cmd === 'Bawah') cy++;
+        if(cmd === 'Kiri') cx--;
+        if(cmd === 'Kanan') cx++;
+        
+        if(cx < 0 || cx > 3 || cy < 0 || cy > 3 || lvl.blocks.some(b => b.x===cx && b.y===cy)) {
+            mapRunning = false; return showFail('Bajak laut menabrak rintangan atau keluar peta!');
+        }
+        renderMapGrid(cx, cy);
+        await delay(500);
+    }
+    
+    if(cx === lvl.targetX && cy === lvl.targetY) {
+        showSuccess(6, g6Curr, `Harta Karun Ditemukan! (+${lvl.star} Bintang)`, () => {
+            if(g6Curr < 3) g6Curr++; initMap();
+        }, lvl.star);
+    } else {
+        showFail('Bajak laut belum sampai di lokasi harta karun.');
+    }
+    mapRunning = false;
+}
+initMap();
+
+// ==========================================
+// GAME 7: RESEP KUE (FUNGSI)
+// ==========================================
+const g7Levels = [
+    { target: 2, star: 3 },
+    { target: 4, star: 3 },
+    { target: 5, star: 3 },
+    { target: 7, star: 3 }
+];
+let g7Curr = 0;
+let bakeCalls = 0;
+let bakingRunning = false;
+
+function initBake() {
+    document.getElementById('g7-lvl').textContent = `Level ${g7Curr + 1} / 4`;
+    document.getElementById('g7-desc').textContent = `Pesanan: ${g7Levels[g7Curr].target} Kue. Panggil fungsi buatKue()!`;
+    bakeCalls = 0;
+    renderBakeCalls();
+    document.getElementById('cakes-produced').innerHTML = '';
+}
+
+function addFunctionCall() {
+    if(bakingRunning) return;
+    bakeCalls++;
+    renderBakeCalls();
+}
+
+function renderBakeCalls() {
+    const fc = document.getElementById('function-calls');
+    fc.innerHTML = '';
+    for(let i=0; i<bakeCalls; i++) {
+        const div = document.createElement('div');
+        div.className = 'code-line';
+        div.innerHTML = `<span style="color:#fbc531; cursor:pointer;" onclick="if(!bakingRunning){bakeCalls--;renderBakeCalls();}">buatKue(); ❌</span>`;
+        fc.appendChild(div);
+    }
+}
+
+function clearBake() { if(!bakingRunning) initBake(); }
+
+async function checkBake() {
+    if(bakingRunning) return;
+    bakingRunning = true;
+    const tgt = g7Levels[g7Curr].target;
+    const container = document.getElementById('cakes-produced');
+    container.innerHTML = '';
+    const oven = document.getElementById('oven');
+    
+    for(let i=0; i<bakeCalls; i++) {
+        oven.classList.add('baking');
+        oven.textContent = 'Memanggang...';
+        await delay(600);
+        oven.classList.remove('baking');
+        oven.textContent = 'Oven';
+        const cake = document.createElement('div');
+        cake.className = 'cake-item';
+        cake.textContent = '🎂';
+        container.appendChild(cake);
+        await delay(200);
+    }
+    
+    if(bakeCalls === tgt) {
+        showSuccess(7, g7Curr, `Kerja bagus! Pesanan ${tgt} kue selesai. (+${g7Levels[g7Curr].star} Bintang)`, () => {
+            if(g7Curr < 3) g7Curr++; initBake();
+        }, g7Levels[g7Curr].star);
+    } else {
+        showFail(`Pesanan adalah ${tgt} kue, tapi kamu membuat ${bakeCalls} kue.`);
+    }
+    bakingRunning = false;
+}
+initBake();
+
+// ==========================================
+// GAME 8: DETEKTIF (DEBUGGING)
+// ==========================================
+const g8Levels = [
+    {
+        code: [
+            { text: 'robot.maju();', bug: false },
+            { text: 'robot.mundur(); // SEHARUSNYA MAJU', bug: true, fix: 'robot.maju();' },
+            { text: 'robot.belokKanan();', bug: false }
+        ], star: 3
+    },
+    {
+        code: [
+            { text: 'if (adaTembok) {', bug: false },
+            { text: '  robot.maju(); // NABRAK TEMBOK!', bug: true, fix: '  robot.belok();' },
+            { text: '}', bug: false }
+        ], star: 3
+    },
+    {
+        code: [
+            { text: 'for(let i=0; i<3; i++) {', bug: false },
+            { text: '  robot.diam(); // HARUSNYA JALAN', bug: true, fix: '  robot.maju();' },
+            { text: '}', bug: false }
+        ], star: 3
+    },
+    {
+        code: [
+            { text: 'let kecepatan = 0;', bug: false },
+            { text: 'robot.lari(kecepatan); // KOK 0?', bug: true, fix: 'let kecepatan = 10;' },
+            { text: 'robot.lompat();', bug: false }
+        ], star: 3
+    },
+    {
+        code: [
+            { text: 'while (belumSampai) {', bug: false },
+            { text: '  robot.tidur(); // JANGAN TIDUR', bug: true, fix: '  robot.maju();' },
+            { text: '}', bug: false }
+        ], star: 3
+    }
+];
+let g8Curr = 0;
+
+function initDebug() {
+    document.getElementById('g8-lvl').textContent = `Level ${g8Curr + 1} / 5`;
+    const container = document.getElementById('debug-code-lines');
+    container.innerHTML = '';
+    const lvl = g8Levels[g8Curr];
+    
+    lvl.code.forEach((line, idx) => {
+        const div = document.createElement('div');
+        div.className = 'bug-line code-line';
+        div.textContent = line.text;
+        div.dataset.idx = idx;
+        div.onclick = () => {
+            document.querySelectorAll('.bug-line').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+        };
+        container.appendChild(div);
+    });
+}
+
+function checkDebug() {
+    const selected = document.querySelector('.bug-line.selected');
+    if(!selected) return showFail('Pilih salah satu baris kode yang menurutmu SALAH (mengandung bug).');
+    
+    const idx = parseInt(selected.dataset.idx);
+    const lvl = g8Levels[g8Curr];
+    if(lvl.code[idx].bug) {
+        selected.textContent = lvl.code[idx].fix;
+        selected.style.color = '#2ed573';
+        document.getElementById('buggy-animation').textContent = '🤖⚡';
+        setTimeout(() => {
+            showSuccess(8, g8Curr, `Bug diperbaiki! Robot berhasil jalan. (+${lvl.star} Bintang)`, () => {
+                document.getElementById('buggy-animation').textContent = '🤖';
+                if(g8Curr < 4) g8Curr++; initDebug();
+            }, lvl.star);
+        }, 1000);
+    } else {
+        showFail('Baris itu sudah benar, bukan di situ bug-nya!');
+    }
+}
+initDebug();
+
+// ==========================================
+// GAME 9: LACI (ARRAY)
+// ==========================================
+const g9Levels = [
+    { items: ['🍎', '🍌', '🍉', '🍇'], target: '🍎', targetIdx: 0, star: 3 },
+    { items: ['🍎', '🍌', '🍉', '🍇'], target: '🍉', targetIdx: 2, star: 3 },
+    { items: ['🚗', '🚌', '🚓', '🚑', '🚒'], target: '🚑', targetIdx: 3, star: 3 },
+    { items: ['⚽', '🏀', '🏈', '⚾', '🎾'], target: '🎾', targetIdx: 4, star: 3 },
+    { items: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊'], target: '🐭', targetIdx: 2, star: 3 }
+];
+let g9Curr = 0;
+
+function initArray() {
+    document.getElementById('g9-lvl').textContent = `Level ${g9Curr + 1} / 5`;
+    const lvl = g9Levels[g9Curr];
+    document.getElementById('array-mission').textContent = `Misi: Ambil ${lvl.target}!`;
+    document.getElementById('array-index').value = 0;
+    
+    // Update code line display to show current array
+    const logicBlock = document.querySelector('#game-9 .logic-block .code-line');
+    logicBlock.innerHTML = `<span class="keyword">let</span> laci = [${lvl.items.join(', ')}];`;
+    
+    const container = document.getElementById('array-slots');
+    container.innerHTML = '';
+    lvl.items.forEach((item, idx) => {
+        const slot = document.createElement('div');
+        slot.className = 'array-slot';
+        slot.textContent = item;
+        const label = document.createElement('div');
+        label.className = 'array-index-label';
+        label.textContent = idx;
+        slot.appendChild(label);
+        container.appendChild(slot);
+    });
+}
+
+function checkArray() {
+    const idx = parseInt(document.getElementById('array-index').value);
+    const lvl = g9Levels[g9Curr];
+    if(idx === lvl.targetIdx) {
+        showSuccess(9, g9Curr, `Benar! Indeks ke-${idx} adalah ${lvl.target}. (+${lvl.star} Bintang)`, () => {
+            if(g9Curr < 4) g9Curr++; initArray();
+        }, lvl.star);
+    } else {
+        const wrongItem = lvl.items[idx] || 'Kosong';
+        showFail(`Salah! Indeks ke-${idx} itu isinya ${wrongItem}, bukan ${lvl.target}. Ingat, Array dimulai dari 0!`);
+    }
+}
+initArray();
+
+// ==========================================
+// GAME 10: BEL (EVENT)
+// ==========================================
+const g10Levels = [
+    { type: 'click', action: 'masuk', text: 'Misi: Jika bel diklik, murid harus masuk kelas.', star: 4 },
+    { type: 'hover', action: 'tidur', text: 'Misi: Jika kursor diarahkan (hover) ke bel, murid malah tidur.', star: 4 },
+    { type: 'click', action: 'pulang', text: 'Misi: Jika bel diklik, murid pulang sekolah.', star: 4 },
+    { type: 'drag', action: 'masuk', text: 'Misi: Jika bel ditarik (drag), murid masuk kelas.', star: 4 }
+];
+let g10Curr = 0;
+
+function initEventGame() {
+    document.getElementById('g10-lvl').textContent = `Level ${g10Curr + 1} / 4`;
+    document.getElementById('g10-desc').textContent = g10Levels[g10Curr].text;
+    document.getElementById('event-type').value = '';
+    document.getElementById('event-action').value = '';
+    document.getElementById('student').textContent = '👨‍🎓';
+}
+
+function triggerBell() {
+    // Only used for visual click effect, real validation is in simulateEventGame
+    const bell = document.getElementById('school-bell');
+    bell.classList.add('ringing');
+    setTimeout(() => bell.classList.remove('ringing'), 200);
+}
+
+function simulateEventGame() {
+    const selType = document.getElementById('event-type').value;
+    const selAction = document.getElementById('event-action').value;
+    
+    if(!selType || !selAction) return showFail('Pilih Event dan Aksi terlebih dahulu!');
+    
+    const lvl = g10Levels[g10Curr];
+    const stu = document.getElementById('student');
+    
+    if(selType === lvl.type && selAction === lvl.action) {
+        if(selAction === 'masuk') stu.textContent = '🏃‍♂️ (Masuk Kelas)';
+        if(selAction === 'tidur') stu.textContent = '😴 (Tidur)';
+        if(selAction === 'pulang') stu.textContent = '🚶‍♂️ (Pulang)';
+        
+        if(selType === 'click') triggerBell();
+        
+        setTimeout(() => {
+            showSuccess(10, g10Curr, `Event berhasil dipicu! (+${lvl.star} Bintang)`, () => {
+                if(g10Curr < 3) g10Curr++; initEventGame();
+            }, lvl.star);
+        }, 1000);
+    } else {
+        showFail('Event atau Aksi tidak sesuai dengan Misi.');
+    }
+}
+initEventGame();
+
