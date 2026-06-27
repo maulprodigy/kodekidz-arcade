@@ -6,6 +6,8 @@
     <title>KodeKidz - 5 Game Pemrograman</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <header class="hero">
@@ -17,9 +19,9 @@
                 <div style="display: flex; align-items: center; justify-content: center;">
                     <span>
                         <svg class="star-icon" viewBox="0 0 24 24" width="24" height="24" fill="#f1c40f"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg> 
-                        Bintang: <span id="star-count">0</span> / 30
+                        Bintang: <span id="star-count">0</span> / 100
                     </span>
-                    <button id="reset-progress-btn" style="background: none; border: none; color: rgba(255,255,255,0.8); margin-left: 15px; cursor: pointer; text-decoration: underline; font-size: 0.8rem; font-family: 'Quicksand';">Ganti Pemain</button>
+                    <button id="logout-btn" style="background: none; border: none; color: rgba(255,255,255,0.8); margin-left: 15px; cursor: pointer; text-decoration: underline; font-size: 0.8rem; font-family: 'Quicksand';">Keluar / Logout</button>
                 </div>
             </div>
             
@@ -33,6 +35,11 @@
                 <button class="lvl-btn" data-game="3">3. Dokter (Kondisi)</button>
                 <button class="lvl-btn" data-game="4">4. Pabrik (Loop)</button>
                 <button class="lvl-btn" data-game="5">5. Warna (Variabel)</button>
+                <button class="lvl-btn" data-game="6">6. Peta (Algoritma)</button>
+                <button class="lvl-btn" data-game="7">7. Kue (Fungsi)</button>
+                <button class="lvl-btn" data-game="8">8. Detektif (Bug)</button>
+                <button class="lvl-btn" data-game="9">9. Laci (Array)</button>
+                <button class="lvl-btn" data-game="10">10. Bel (Event)</button>
             </div>
         </div>
     </header>
@@ -228,6 +235,164 @@
             </div>
         </div>
 
+        <!-- GAME 6: PETA (ALGORITMA) -->
+        <div id="game-6" class="game-view">
+            <div class="game-layout">
+                <div class="visual-container map-bg">
+                    <div class="pirate-map" id="pirate-map"></div>
+                </div>
+                <div class="controls-container">
+                    <h2>Game 6: Algoritma (Langkah Logis)</h2>
+                    <h3 class="level-indicator" id="g6-lvl">Level 1</h3>
+                    <p id="g6-desc">Tentukan langkah-langkah untuk mencapai harta karun!</p>
+                    <div class="buttons">
+                        <button class="cmd-btn" onclick="addMapCmd('Atas')">🔼 Atas</button>
+                        <button class="cmd-btn" onclick="addMapCmd('Bawah')">🔽 Bawah</button>
+                        <button class="cmd-btn" onclick="addMapCmd('Kiri')">◀️ Kiri</button>
+                        <button class="cmd-btn" onclick="addMapCmd('Kanan')">▶️ Kanan</button>
+                    </div>
+                    <div class="command-queue" id="map-queue"></div>
+                    <div class="action-buttons">
+                         <button class="action-btn play-btn" onclick="checkMap()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Jalan!
+                         </button>
+                         <button class="action-btn clear-btn" onclick="clearMap()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg> Reset
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME 7: RESEP KUE (FUNGSI) -->
+        <div id="game-7" class="game-view">
+            <div class="game-layout">
+                <div class="visual-container kitchen-bg">
+                    <div class="oven-container">
+                        <div class="oven" id="oven">Oven</div>
+                    </div>
+                    <div class="cakes-produced" id="cakes-produced"></div>
+                </div>
+                <div class="controls-container">
+                    <h2>Game 7: Fungsi (Reusable Code)</h2>
+                    <h3 class="level-indicator" id="g7-lvl">Level 1</h3>
+                    <p id="g7-desc">Pesanan: 2 Kue Coklat. Panggil fungsi buatKue()!</p>
+                    <div class="logic-block">
+                        <div class="code-line"><span class="keyword">function</span> buatKue() {</div>
+                        <div class="code-line indent">campurAdonan();</div>
+                        <div class="code-line indent">panggang();</div>
+                        <div class="code-line">}</div>
+                        <br>
+                        <div id="function-calls"></div>
+                    </div>
+                    <div class="buttons" style="margin-top: 10px;">
+                        <button class="cmd-btn" onclick="addFunctionCall()">+ buatKue()</button>
+                    </div>
+                    <div class="action-buttons">
+                         <button class="action-btn play-btn" onclick="checkBake()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Masak!
+                         </button>
+                         <button class="action-btn clear-btn" onclick="clearBake()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg> Reset
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME 8: DETEKTIF (DEBUGGING) -->
+        <div id="game-8" class="game-view">
+            <div class="game-layout">
+                <div class="visual-container detective-bg">
+                    <div id="buggy-animation" style="font-size: 3rem;">🤖</div>
+                    <div class="bug-target" id="bug-target" style="font-size: 3rem;">🏁</div>
+                </div>
+                <div class="controls-container">
+                    <h2>Game 8: Debugging (Cari Bug)</h2>
+                    <h3 class="level-indicator" id="g8-lvl">Level 1</h3>
+                    <p id="g8-desc">Robot tidak bisa mencapai garis finis! Perbaiki kode yang salah.</p>
+                    <div class="logic-block" id="debug-code-lines">
+                        <!-- lines dynamically inserted -->
+                    </div>
+                    <div class="action-buttons">
+                         <button class="action-btn play-btn" onclick="checkDebug()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Uji Kode
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME 9: LACI (ARRAY) -->
+        <div id="game-9" class="game-view">
+            <div class="game-layout">
+                <div class="visual-container array-bg">
+                    <div class="array-container" id="array-slots">
+                        <!-- Array slots -->
+                    </div>
+                    <div style="margin-top: 20px; font-weight: bold; background: white; padding: 10px; border-radius: 10px;" id="array-mission">Misi: Ambil Apel!</div>
+                </div>
+                <div class="controls-container">
+                    <h2>Game 9: Array (Daftar)</h2>
+                    <h3 class="level-indicator" id="g9-lvl">Level 1</h3>
+                    <p>Array dimulai dari indeks 0. Pilih indeks yang tepat untuk mengambil item yang diminta!</p>
+                    <div class="logic-block">
+                        <div class="code-line"><span class="keyword">let</span> laci = [🍎, 🍌, 🍉, 🍇];</div>
+                        <div class="code-line">
+                            <span class="keyword">let</span> pilihan = laci[
+                            <input type="number" id="array-index" class="code-input" min="0" max="10" value="0" style="width: 50px;">
+                            ];
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                         <button class="action-btn play-btn" onclick="checkArray()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Ambil!
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME 10: BEL (EVENT) -->
+        <div id="game-10" class="game-view">
+            <div class="game-layout">
+                <div class="visual-container school-bg">
+                    <div class="bell" id="school-bell" onclick="triggerBell()">🔔</div>
+                    <div class="student" id="student">👨‍🎓</div>
+                </div>
+                <div class="controls-container">
+                    <h2>Game 10: Event (Pemicu)</h2>
+                    <h3 class="level-indicator" id="g10-lvl">Level 1</h3>
+                    <p id="g10-desc">Pasangkan event yang tepat agar murid bereaksi saat bel diklik!</p>
+                    <div class="logic-block">
+                        <div class="code-line">bel.addEventListener(
+                            <select id="event-type" class="code-select">
+                                <option value="">--Pilih Event--</option>
+                                <option value="click">"click"</option>
+                                <option value="hover">"hover"</option>
+                                <option value="drag">"drag"</option>
+                            </select>
+                        , <span class="keyword">function</span>() {</div>
+                        <div class="code-line indent">
+                            murid.aksi = 
+                            <select id="event-action" class="code-select">
+                                <option value="">--Pilih Aksi--</option>
+                                <option value="pulang">Pulang()</option>
+                                <option value="tidur">Tidur()</option>
+                                <option value="masuk">MasukKelas()</option>
+                            </select>;
+                        </div>
+                        <div class="code-line">});</div>
+                    </div>
+                    <div class="action-buttons">
+                         <button class="action-btn play-btn" onclick="simulateEventGame()">
+                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Uji Event!
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Modal Sukses -->
@@ -253,10 +418,26 @@
     <div class="welcome-overlay" id="welcome-overlay">
         <div class="welcome-card">
             <h1 style="color: var(--primary); margin-bottom: 10px; font-size: 2rem;">Halo, Koder! 🚀</h1>
-            <p style="margin-bottom: 20px; color: #7f8c8d;">Yuk, isi data dirimu dulu sebelum bermain:</p>
-            <input type="text" id="input-nama" placeholder="Nama Panggilan" class="input-form">
-            <input type="text" id="input-sekolah" placeholder="Asal Sekolah" class="input-form">
-            <button id="btn-mulai" class="action-btn play-btn" style="margin-top: 15px; width: 100%;">MULAI BERMAIN!</button>
+            <p style="margin-bottom: 20px; color: #7f8c8d;">Masuk dengan akun Google untuk menyimpan skor kamu ke Papan Peringkat Real-time.</p>
+            <button id="btn-login-google" class="action-btn" style="background: white; color: #4285F4; border: 2px solid #4285F4; margin-top: 15px; width: 100%;">
+                <svg viewBox="0 0 24 24" width="24" height="24" style="margin-right: 10px;">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Login dengan Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Layar Asal Sekolah (First Time Only) -->
+    <div class="welcome-overlay hidden" id="school-overlay">
+        <div class="welcome-card">
+            <h1 style="color: var(--primary); margin-bottom: 10px; font-size: 2rem;">Satu langkah lagi! 🎉</h1>
+            <p style="margin-bottom: 20px; color: #7f8c8d;">Tulis asal sekolahmu agar teman-temanmu tahu di papan peringkat.</p>
+            <input type="text" id="input-sekolah" placeholder="Asal Sekolah (Misal: SD Merdeka)" class="input-form">
+            <button id="btn-save-school" class="action-btn play-btn" style="margin-top: 15px; width: 100%;">SIMPAN & MULAI!</button>
         </div>
     </div>
 
