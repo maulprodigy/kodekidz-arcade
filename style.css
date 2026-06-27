@@ -1,0 +1,258 @@
+/* =========================================
+   KODEKIDZ ARCADE - GLOBAL STYLES (SVG/CSS)
+========================================= */
+:root {
+    --primary: #4834d4;
+    --secondary: #686de0;
+    --accent: #f9ca24;
+    --bg-color: #f5f6fa;
+    --text-dark: #2f3640;
+    --text-light: #f5f6fa;
+    --success: #2ed573;
+    --danger: #ff4757;
+    --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; }
+body { background: var(--bg-color); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+/* --- HERO & HEADER --- */
+.hero { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: var(--text-light); padding: 30px 20px 0; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
+.hero-content { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 2.8rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 15px; }
+.icon-pulse { animation: pulse 2s infinite; }
+.score-board { margin: 20px 0; font-size: 1.5rem; font-weight: 700; background: rgba(255,255,255,0.2); display: inline-block; padding: 10px 25px; border-radius: 30px; border: 2px solid rgba(255,255,255,0.5); }
+.score-board span { display: flex; align-items: center; gap: 10px; }
+
+/* --- ICONS & ANIMATIONS --- */
+.star-icon { filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.8)); transition: transform 0.3s; }
+.star-icon:hover { transform: rotate(72deg) scale(1.2); }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* --- TABS --- */
+.level-selector { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; transform: translateY(20px); }
+.lvl-btn { background: white; color: var(--primary); border: none; padding: 12px 20px; border-radius: 20px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+.lvl-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+.lvl-btn.active { background: var(--accent); color: var(--text-dark); border-bottom: 4px solid #f0932b; }
+
+/* --- PLAYGROUND --- */
+.playground { flex: 1; max-width: 1000px; margin: 60px auto 40px; padding: 0 20px; width: 100%; }
+.game-view { display: none; animation: pop 0.4s ease-out; }
+.game-view.active { display: block; }
+
+.game-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; background: white; padding: 30px; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+@media(max-width: 768px) { .game-layout { grid-template-columns: 1fr; } }
+
+/* --- VISUAL CONTAINERS --- */
+.visual-container { background: var(--bg-color); border-radius: var(--radius); min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 4px dashed #dcdde1; padding: 20px; }
+.controls-container { display: flex; flex-direction: column; gap: 15px; }
+.controls-container h2 { color: var(--primary); font-size: 1.8rem; }
+.level-indicator { color: var(--secondary); font-size: 1.2rem; background: #e0e6ed; padding: 5px 15px; border-radius: 12px; display: inline-block; width: fit-content; }
+
+/* --- BUTTONS --- */
+.buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.cmd-btn { background: #f1f2f6; border: 2px solid #dfe4ea; padding: 10px 15px; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+.cmd-btn:hover { background: #eccc68; border-color: #f1c40f; transform: translateY(-2px); }
+.cmd-btn:active { transform: translateY(2px); }
+
+.action-buttons { display: flex; gap: 15px; margin-top: auto; padding-top: 20px; }
+.action-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; color: white; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.action-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+.play-btn { background: var(--success); border-bottom: 4px solid #27ae60; }
+.clear-btn { background: var(--danger); border-bottom: 4px solid #c0392b; }
+
+.command-queue { min-height: 60px; background: #f1f2f6; border-radius: 10px; padding: 10px; display: flex; flex-wrap: wrap; gap: 5px; border: 2px solid #dfe4ea; align-items: center; }
+.queue-item { background: white; padding: 5px 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; cursor: pointer; animation: pop 0.2s; }
+.queue-item:hover { background: #ff7675; color: white; }
+
+/* --- LOGIC BLOCKS --- */
+.logic-block { background: #2f3640; color: #f5f6fa; padding: 20px; border-radius: 12px; font-family: monospace; font-size: 1.1rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.code-line { margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.code-line.indent { padding-left: 30px; }
+.keyword { color: #e1b12c; font-weight: bold; }
+.string { color: #4cd137; }
+.prop { color: #00a8ff; }
+.code-input, .code-select { background: #353b48; color: white; border: 1px solid #718093; padding: 5px; border-radius: 5px; font-family: monospace; font-size: 1rem; outline: none; }
+.code-input:focus, .code-select:focus { border-color: #00a8ff; }
+
+/* =========================================
+   GAME 1: ROBOT
+========================================= */
+.grid { display: grid; gap: 2px; background: #dcdde1; padding: 4px; border-radius: 8px; width: 100%; max-width: 300px; aspect-ratio: 1; }
+.cell { background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.3s; }
+.cell.wall { background: #7f8c8d; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.robot { width: 80%; height: 80%; display: flex; align-items: center; justify-content: center; transition: transform 0.4s ease; }
+.robot-svg { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+
+/* =========================================
+   GAME 2: BURGER
+========================================= */
+.burger-bg { background: repeating-linear-gradient(45deg, #f1f2f6, #f1f2f6 10px, #ffffff 10px, #ffffff 20px); }
+.order-ticket { background: #fffdf1; padding: 10px 15px; border-left: 5px solid #e1b12c; border-radius: 5px; margin-bottom: 20px; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 10px; }
+.burger-plate-container { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; padding-bottom: 20px; }
+.burger-plate { display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; z-index: 2; min-height: 150px; }
+.plate-base { width: 150px; height: 20px; background: #bdc3c7; border-radius: 50% / 100% 100% 0 0; margin-top: -10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+/* CSS Burger Ingredients */
+.css-ing { width: 120px; position: relative; animation: bounceDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+@keyframes bounceDrop { 0% { transform: translateY(-50px) scale(0.9); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+
+.bun-bottom { height: 30px; background: linear-gradient(to bottom, #f39c12, #e67e22); border-radius: 10px 10px 30px 30px; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1); }
+.bun-top { height: 45px; background: linear-gradient(to bottom, #f1c40f, #f39c12); border-radius: 60px 60px 10px 10px; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+.bun-top::after { content: ''; position: absolute; width: 4px; height: 6px; background: #fff; border-radius: 50%; top: 10px; left: 30px; box-shadow: 20px 5px 0 #fff, 40px 10px 0 #fff, 60px 0px 0 #fff, 80px 15px 0 #fff; opacity: 0.8; }
+.meat { height: 20px; background: linear-gradient(to bottom, #5c2c16, #3e1f0e); border-radius: 8px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); }
+.cheese { height: 8px; width: 130px; background: #fbc531; border-radius: 2px; margin: 0 -5px; box-shadow: 1px 1px 3px rgba(0,0,0,0.2); position: relative; }
+.cheese::after { content: ''; position: absolute; right: 10px; top: 0; width: 20px; height: 15px; background: #fbc531; transform: skewY(20deg); border-radius: 0 0 5px 5px; }
+.lettuce { height: 15px; width: 135px; background: #4cd137; border-radius: 10px; margin: 0 -7px; box-shadow: inset 0 5px 10px rgba(0,0,0,0.1); border: 2px solid #44bd32; border-style: dotted solid; }
+
+/* Mini icons for buttons */
+.css-ing[class*="-mini"] { width: 30px; height: 10px; animation: none; }
+.bun-bottom-mini { background: #e67e22; border-radius: 2px 2px 8px 8px; }
+.bun-top-mini { height: 15px; background: #f39c12; border-radius: 15px 15px 2px 2px; }
+.meat-mini { background: #5c2c16; border-radius: 3px; }
+.cheese-mini { background: #fbc531; height: 4px; width: 34px; margin: 0 -2px; }
+.lettuce-mini { background: #4cd137; height: 6px; width: 34px; border-radius: 4px; }
+.burger-vis-mini { display: flex; flex-direction: column-reverse; align-items: center; gap: 1px; transform: scale(0.6); transform-origin: left top; height: 40px; margin-top: 10px; }
+
+/* =========================================
+   GAME 3: DOKTER (IF/ELSE)
+========================================= */
+.pet-bg { background: radial-gradient(circle, #ffeaa7 0%, #fab1a0 100%); }
+.pet-status { position: absolute; top: 20px; left: 20px; background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; }
+.pet-display-area { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; animation: bounce 2s infinite ease-in-out; }
+.pet-svg { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
+/* Condition Overlays */
+.cond-overlay { position: absolute; top: -20px; right: -20px; width: 60px; height: 60px; z-index: 5; animation: pop 0.3s; }
+.cond-dirty { background: #8d6e63; width: 30px; height: 30px; border-radius: 50%; box-shadow: -20px 10px 0 -5px #8d6e63, 20px 20px 0 -10px #8d6e63, 0 30px 0 -5px #8d6e63; opacity: 0.8; top: 20px; right: 20px; }
+.cond-hungry { background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #dfe6e9; }
+.cond-hungry::before { content: '🍗'; font-size: 24px; }
+.cond-hungry::after { content: ''; position: absolute; bottom: -10px; left: 10px; width: 10px; height: 10px; background: white; border-radius: 50%; box-shadow: -10px 15px 0 -2px white; }
+.cond-sick { background: #ff7675; border-radius: 5px; width: 15px; height: 40px; right: 0; top: 0; border: 2px solid white; position: absolute; }
+.cond-sick::after { content: ''; position: absolute; bottom: -10px; left: -5px; width: 20px; height: 20px; background: #ff7675; border-radius: 50%; border: 2px solid white; }
+.cond-happy { content: '✨'; font-size: 40px; filter: drop-shadow(0 0 10px gold); animation: pulse 1s infinite; }
+
+/* =========================================
+   GAME 4: PABRIK (LOOP)
+========================================= */
+.factory-bg { background: #2d3436; border-color: #636e72; }
+.conveyor { width: 100%; position: relative; height: 80px; display: flex; align-items: flex-end; justify-content: flex-start; padding: 0 10px 10px; overflow: hidden; }
+.conveyor-belt-track { position: absolute; bottom: 0; left: 0; width: 200%; height: 20px; background: repeating-linear-gradient(90deg, #b2bec3, #b2bec3 20px, #636e72 20px, #636e72 40px); animation: moveBelt 2s linear infinite; border-top: 4px solid #74b9ff; }
+@keyframes moveBelt { 0% { transform: translateX(0); } 100% { transform: translateX(-40px); } }
+
+.factory-boxes { display: flex; gap: 15px; z-index: 2; position: relative; margin-bottom: 5px; }
+/* CSS Box instead of emoji */
+.box { width: 40px; height: 40px; background: #ffeaa7; border: 2px solid #fdcb6e; border-radius: 4px; position: relative; transition: all 0.3s; transform-origin: bottom center; }
+.box.empty { background: rgba(255,255,255,0.1); border-style: dashed; border-color: #636e72; }
+.box.filled { background: #ff7675; border-color: #d63031; animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.box.filled::after { content: ''; position: absolute; top: 0; left: 15px; width: 6px; height: 100%; background: #fdcb6e; } /* Ribbon */
+.box.filled::before { content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 6px; background: #fdcb6e; }
+.box.error { background: transparent; border: none; font-size: 30px; display: flex; align-items: center; justify-content: center; animation: shake 0.5s; }
+
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
+
+/* =========================================
+   GAME 5: MEWARNAI
+========================================= */
+.canvas-bg { background: repeating-linear-gradient(0deg, transparent, transparent 19px, #dfe6e9 19px, #dfe6e9 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, #dfe6e9 19px, #dfe6e9 20px); background-color: #f5f6fa; }
+.mission-text { position: absolute; top: 20px; background: #fff; padding: 10px 20px; border-radius: 20px; font-weight: bold; border: 2px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.house-drawing { display: flex; flex-direction: column; align-items: center; margin-top: 40px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); }
+.h-roof { width: 0; height: 0; border-left: 80px solid transparent; border-right: 80px solid transparent; border-bottom: 80px solid #ccc; transition: border-color 0.5s; }
+.h-wall { width: 140px; height: 120px; background: #ccc; position: relative; transition: background-color 0.5s; display: flex; justify-content: center; }
+.h-window { width: 30px; height: 30px; background: #81ecec; border: 3px solid white; position: absolute; top: 20px; border-radius: 50%; }
+.h-window:nth-child(1) { left: 20px; }
+.h-window:nth-child(2) { right: 20px; }
+.h-door { width: 40px; height: 60px; background: #ccc; position: absolute; bottom: 0; border-top-left-radius: 20px; border-top-right-radius: 20px; transition: background-color 0.5s; border: 3px solid rgba(255,255,255,0.3); border-bottom: none; }
+.door-knob { width: 8px; height: 8px; background: #f1c40f; border-radius: 50%; position: absolute; top: 30px; right: 5px; }
+
+/* =========================================
+   MODALS & CONFETTI
+========================================= */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+.modal.active { display: flex; }
+.modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.modal-title { font-size: 2.5rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.modal-title.success { color: var(--success); }
+.modal-title.error { color: var(--danger); }
+.modal-star { animation: pulse 1.5s infinite; filter: drop-shadow(0 0 10px gold); }
+.modal-content p { font-size: 1.2rem; margin-bottom: 25px; line-height: 1.5; }
+
+/* CSS Confetti System */
+.confetti { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
+.modal.active .confetti { display: block; }
+.confetti::before, .confetti::after { content: ''; position: absolute; width: 10px; height: 10px; background: #f1c40f; top: -10px; border-radius: 50%; animation: rain 2s linear infinite; box-shadow: 20px 10px 0 #e74c3c, 40px 30px 0 #3498db, 60px 15px 0 #2ecc71, 80px 20px 0 #9b59b6, 100px 5px 0 #e67e22, 150px 25px 0 #1abc9c, 200px 10px 0 #34495e, 250px 30px 0 #f1c40f, 300px 15px 0 #e74c3c, 350px 5px 0 #3498db; }
+.confetti::after { left: 50px; animation-delay: 1s; box-shadow: 10px 20px 0 #e74c3c, 50px 10px 0 #3498db, 90px 35px 0 #2ecc71, 130px 5px 0 #9b59b6, 170px 25px 0 #e67e22, 220px 15px 0 #1abc9c, 270px 5px 0 #34495e, 320px 25px 0 #f1c40f, 370px 10px 0 #e74c3c; }
+@keyframes rain { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(400px) rotate(360deg); opacity: 0; } }
+
+/* =========================================
+   WELCOME SCREEN & LEADERBOARD
+========================================= */
+.welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+.welcome-overlay.hidden { display: none; }
+.welcome-card { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.input-form { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 1.1rem; outline: none; transition: border-color 0.3s; }
+.input-form:focus { border-color: var(--primary); }
+
+.leaderboard-content { max-width: 600px; width: 95%; max-height: 90vh; overflow-y: auto; background: #f5f6fa; }
+.podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 30px 0; height: 180px; }
+.podium-item { display: flex; flex-direction: column; align-items: center; width: 30%; }
+.podium-name { font-weight: bold; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 5px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center; }
+.podium-school { font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center;}
+.podium-block { width: 100%; border-top-left-radius: 10px; border-top-right-radius: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 10px; color: white; font-weight: bold; font-size: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+.rank-1 .podium-block { height: 120px; background: linear-gradient(to bottom, #f1c40f, #f39c12); }
+.rank-2 .podium-block { height: 90px; background: linear-gradient(to bottom, #bdc3c7, #95a5a6); }
+.rank-3 .podium-block { height: 60px; background: linear-gradient(to bottom, #e67e22, #d35400); }
+
+.leaderboard-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; text-align: left; }
+.leader-row { background: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.leader-row .rank { font-weight: bold; font-size: 1.2rem; color: var(--secondary); width: 30px; }
+.leader-row .info { flex: 1; }
+.leader-row .info-name { font-weight: bold; font-size: 1.1rem; }
+.leader-row .info-school { font-size: 0.8rem; color: #7f8c8d; }
+.leader-row .score { font-weight: bold; color: #f39c12; font-size: 1.2rem; display: flex; align-items: center; gap: 5px; }
+
+/* =========================================
+   GAME 6: PETA HARTA KARUN
+========================================= */
+.map-bg { background: #ffeaa7; border: 4px dashed #d63031; }
+.pirate-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #81ecec; padding: 5px; border-radius: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); width: 100%; max-width: 250px; aspect-ratio: 1; margin-bottom: 15px;}
+.map-cell { background: #ffeaa7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.3s; }
+.map-cell.water { background: #74b9ff; }
+.map-cell.treasure { background: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
+
+/* =========================================
+   GAME 7: RESEP KUE (FUNGSI)
+========================================= */
+.kitchen-bg { background: #f5f6fa; border-color: #ff9ff3; }
+.oven-container { background: #576574; padding: 20px; border-radius: 15px; margin-bottom: 20px; color: white; text-align: center; font-weight: bold; border: 4px solid #222f3e; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+.oven { background: #c8d6e5; color: #222f3e; padding: 30px; border-radius: 10px; font-size: 1.2rem; border: inset 5px #8395a7; transition: background 0.3s; }
+.oven.baking { background: #ff9f43; animation: pulse 0.5s infinite; color: white; }
+.cakes-produced { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; min-height: 50px; }
+.cake-item { font-size: 2.5rem; animation: pop 0.4s; }
+
+/* =========================================
+   GAME 8: DETEKTIF (DEBUGGING)
+========================================= */
+.detective-bg { background: #2f3542; color: #a4b0be; }
+.bug-line { cursor: pointer; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; transition: background 0.2s; border: 1px solid transparent; display: flex; justify-content: space-between;}
+.bug-line:hover { background: #57606f; }
+.bug-line.selected { border-color: #ff4757; background: rgba(255, 71, 87, 0.2); }
+.bug-target { animation: pulse 2s infinite; margin-top: 50px; }
+
+/* =========================================
+   GAME 9: LACI (ARRAY)
+========================================= */
+.array-bg { background: #d1ccc0; border-color: #84817a; }
+.array-container { display: flex; gap: 5px; background: #b33939; padding: 15px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+.array-slot { width: 50px; height: 60px; background: #ffda79; border: 2px solid #cc8e35; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; position: relative; font-size: 1.8rem; border-radius: 5px; }
+.array-index-label { position: absolute; top: -25px; left: 0; width: 100%; text-align: center; font-weight: bold; color: white; font-size: 1rem; }
+
+/* =========================================
+   GAME 10: BEL (EVENT)
+========================================= */
+.school-bg { background: #c7ecee; border-color: #f6e58d; }
+.bell { font-size: 4rem; cursor: pointer; transition: transform 0.1s; user-select: none; margin-bottom: 20px; }
+.bell:active { transform: scale(0.9); }
+.bell.ringing { animation: shake 0.2s infinite; }
+.student { font-size: 5rem; transition: all 0.3s; margin-top: 10px; }
