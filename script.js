@@ -1,7 +1,7 @@
 // --- SUPABASE INIT ---
 const SUPABASE_URL = 'https://pabzyjwbeqzxajksbvzf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NecoOmdj4Z4XZD0wxPx3Xw_0kDfmOR1';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- GLOBAL STATE & LEADERBOARD ---
 let stars = 0;
@@ -14,7 +14,7 @@ let leaderboardData = [];
 
 async function initSystem() {
     // Subscribe to Auth changes
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session) {
             await handleUserLogin(session.user);
         } else if (event === 'SIGNED_OUT') {
@@ -28,14 +28,14 @@ async function initSystem() {
         }
     });
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
         document.getElementById('welcome-overlay').classList.remove('hidden');
     }
     
     // Subscribe to leaderboard real-time changes
     fetchLeaderboard();
-    supabase.channel('public:leaderboard')
+    supabaseClient.channel('public:leaderboard')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'leaderboard' }, payload => {
             fetchLeaderboard();
         })
@@ -48,7 +48,7 @@ async function handleUserLogin(user) {
     currentPlayer.name = user.user_metadata.full_name || 'Koder';
     
     // Cek database
-    const { data, error } = await supabase.from('leaderboard').select('*').eq('id', user.id).maybeSingle();
+    const { data, error } = await supabaseClient.from('leaderboard').select('*').eq('id', user.id).maybeSingle();
     
     if (data) {
         currentPlayer.school = data.school;
@@ -64,7 +64,7 @@ async function handleUserLogin(user) {
 
 // Tombol Login
 document.getElementById('btn-login-google').addEventListener('click', async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
 });
 
 // Tombol Simpan Sekolah (User Baru)
@@ -76,7 +76,7 @@ document.getElementById('btn-save-school').addEventListener('click', async () =>
     stars = 0;
     
     // Insert ke Supabase
-    await supabase.from('leaderboard').upsert({
+    await supabaseClient.from('leaderboard').upsert({
         id: currentPlayer.id,
         name: currentPlayer.name,
         school: currentPlayer.school,
@@ -90,7 +90,7 @@ document.getElementById('btn-save-school').addEventListener('click', async () =>
 // Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
     if(confirm("Yakin ingin keluar?")) {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
     }
 });
 
@@ -109,12 +109,12 @@ async function saveProgress() {
         // Simpan local state
         localStorage.setItem(`kodekidz_levels_${currentPlayer.id}`, JSON.stringify(Array.from(completedLevelsSet)));
         // Update ke Supabase
-        await supabase.from('leaderboard').update({ stars: stars }).eq('id', currentPlayer.id);
+        await supabaseClient.from('leaderboard').update({ stars: stars }).eq('id', currentPlayer.id);
     }
 }
 
 async function fetchLeaderboard() {
-    const { data, error } = await supabase.from('leaderboard').select('*').order('stars', { ascending: false });
+    const { data, error } = await supabaseClient.from('leaderboard').select('*').order('stars', { ascending: false });
     if (data) {
         leaderboardData = data;
         if(document.getElementById('leaderboard-modal').classList.contains('active')) {
